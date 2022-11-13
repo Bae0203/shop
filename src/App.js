@@ -33,10 +33,10 @@ function App() {
             </Nav.Link>
             <Nav.Link
               onClick={() => {
-                Navigate("/detail");
+                Navigate("/about/member");
               }}
             >
-              Detail
+              About
             </Nav.Link>
           </Nav>
         </Container>
@@ -95,12 +95,16 @@ const About = () => {
 };
 
 const Card = (props) => {
+  let Navigate = useNavigate();
   console.log("e", props.data, props.index);
   return (
     <Col>
       <img
         src={`https://codingapple1.github.io/shop/shoes${props.index + 1}.jpg`}
         width="80%"
+        onClick={() => {
+          Navigate(`/detail/${props.index}`);
+        }}
       />
       <h4>{props.data.title}</h4>
       <p>{props.data.price}</p>
