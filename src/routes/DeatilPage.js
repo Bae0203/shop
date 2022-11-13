@@ -1,50 +1,98 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-//얘를 쓰면 css파일과 다르데 다른 js파일을 오염안시킨다.
-//React특성상 모든 파일을 하나로 만들어주는데 그때 css도 하나로 만들어져서
-//파일에 묻히는데 그 css파일을 얘를들어 App.js의 종속파일로 만들고 싶으면
-//App.module.css 라고 작명하면 저 css파일은 App.js파일에만 적용되서 오염이 안된다
-//아 그리고 이거 쓰면 로딩시간 단축됨
-import styled from "styled-components";
-
-//styled-component에도 props문법을 쓸수 있는데
 /**
- * 예를들어
- * let Abtm = styled.button`
- *  background-color : ${props=>props.bg}
- *
- *  간단한 프로그래밍도 가능한데
- *  color : ${props => props.bg == 'black'? 'white':'black'}
- *  이렇게 간단한 프로그래밍도 가능하다
- * `
- *
- * <Abtn bg="red"> dd </Abtn>
- *
- * 이렇게 하면 props를 넘겨 받을 수 있다
- */
-
-/**
- * 기존에 했던 스타일을 복사할 수도 있는데
- * let Bbtn = styled.button(Abtn)`
- *  ...
- * `
- * 이렇게 커스터마이징도 할 수 있다.
+ * 컴포넌트의 Life cycle
+ * 1. 페이지에 장착 (mount)
+ * 2. 컴포넌트 업데이트 (update)
+ * 3. 메인에 detail페이지가 제거 됨(unmount)
  */
 
 const DeatilPage = (props) => {
+  let [count, setCount] = useState(0);
+  let [hidediv, setHidediv] = useState(true);
+  let [inputval, setInputval] = useState(0);
+  let [numCh, setNumCh] = useState(true);
+
+  //detail 컴포넌트가 mount되거나 update될때 마다 실행함
+  /**
+   * 아니 useEffect 밖에다 써도 똑같은데 왜씀??
+   *
+   * 쓰는 이유
+   * useEffect는 html 렌저링 후 동작,
+   * 만약 만번정도 도는 for문이 1~2초 걸린다하면
+   * 1~2초 뒤에 html이 보일 거임
+   * 따라서 조금더 효율적으로 동작하는걸 알 수 있음
+   *
+   * 그럼 안에 뭐 적으면 되나?
+   * 어려운 연산 같은거
+   * 서버에서 데이터 가져오는 작업
+   * 타이머
+   */
+  useEffect(() => {
+    console.log("dd");
+    setTimeout(() => {
+      setHidediv(false);
+    }, 2000);
+    //타이머 제거하는법 (unmonut시 실행시키는 법)
+    // let a = setTimeout(() => {
+    //   setHidediv(false);
+    // }, 2000);
+
+    // return()=>{
+    //   clearTimeout(a)
+    // }
+    //그래서 이거 언제쓰냐?
+    //서버로 데이터 요청하는 코드가 2초정도 소요된다 치면
+    //그 2초사이 재렌더링을 하면 요청을 계속하게 되서 버그가 발생 할 수 있음
+    //그래서 return안에 기존 데이터요청은 제거해주세요~ 라는 코드를 짜면 됨
+  }, [count]); //useEffect 실행조건 넣는곳 ( [] 안에 있는 변수가 변할때마다 실행해주세요~ )
+  // 만약 [] 안에 아무것도 없으면 처음 렌더링 될때 한번만 실행됨
+  /**
+   * useEffect(()=>{}) - mount, update시 작동
+   * useEffect(()=>{},[]) - mount시 작동
+   */
+
+  useEffect(() => {
+    console.log("i", parseInt(inputval));
+    if (isNaN(parseInt(inputval))) {
+      setNumCh(true);
+      console.log(numCh);
+    } else {
+      setNumCh(false);
+      console.log(numCh);
+    }
+  }, [inputval]);
+
   //유저가 입력한 파라미터가 나옴
   let { id } = useParams();
-  console.log(id);
-  console.log(props.shoes.filter((i) => console.log("i : " + i.id)));
 
   return (
     <div className="container">
+      {hidediv ? (
+        <div className="alert alert-warning">2초 이내 구매시 할인</div>
+      ) : null}
+
+      {count}
+      <button
+        onClick={() => {
+          setCount(count + 1);
+        }}
+      >
+        dd
+      </button>
       <div className="row">
         <div className="col-md-6">
           <img src={ImgCh(id)} width="100%" />
         </div>
         <div className="col-md-6">
+          {numCh ? (
+            <div className="alert alert-warning">숫자만 입력해주세요!</div>
+          ) : null}
+          <input
+            value={inputval}
+            onChange={(e) => setInputval(e.target.value)}
+          />
           {/* 응용하는 방법 : 상품 정렬 버튼이 있다 하면 분명 꼬일거임
           예) 0번이 하하 였는데 갑자기 0번 페이지가 가가가가 로 변함
           따라서 URL파라미터 접속시 0번째 상품말고 상품의 id로 구분하는게 좋을 듯*/}
@@ -72,6 +120,5 @@ const IdCheck = (props, id, chnum) => {
 };
 
 const ImgCh = (id) => {
-  console.log(id);
   return `https://codingapple1.github.io/shop/shoes${parseInt(id) + 1}.jpg`;
 };

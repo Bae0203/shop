@@ -8,10 +8,12 @@ import { useState } from "react";
 import data from "./Server";
 import { Route, Routes, Link, useNavigate, Outlet } from "react-router-dom";
 import Detail from "./routes/DeatilPage";
+import axios from "axios";
 
 function App() {
-  let [shoes] = useState(data);
-  console.log(shoes[0]);
+  let [shoes, setShoes] = useState(data);
+  let [page, setPage] = useState(2);
+  let [load, setLoad] = useState(false);
 
   //페이지 이동 도와주는 Navigate (이거도 훅임)
   //쓰는 방법은 그냥 href대신 Navigate쓰면 됩니다.
@@ -55,6 +57,51 @@ function App() {
                   })}
                 </Row>
               </Container>
+              {/* 서버 요청하기 (Ajax) */}
+
+              {load ? (
+                <div className="alert alert-warning">로딩중 입니다.</div>
+              ) : null}
+              <button
+                onClick={() => {
+                  setLoad(true);
+                  setPage(page + 1);
+                  axios
+                    .get(`https://codingapple1.github.io/shop/data${page}.json`)
+                    .then((e) => {
+                      let copy = [...shoes, ...e.data];
+
+                      // e.data.map((e) => {
+                      //   copy.push(e);
+                      // });
+                      setShoes(copy);
+                      setLoad(false);
+                      console.log(load);
+                    })
+                    .catch((e) => {
+                      console.log(e);
+                      console.log("실패 ㅜㅜ");
+                      if (e.response.status == 404) {
+                        alert("상품이 없습니다.");
+                      }
+                      setLoad(false);
+                      console.log(load);
+                    });
+
+                  /**
+                   * 동시에 ajax요청 여러개 할려면
+                   * Promise.all([ axios.get('/url1'), axios.get('/url2') ])
+                   * .then()
+                   * 이런식으로 하면 됨
+                   *
+                   * fetch?
+                   * fetch를 쓰면 json그대로 보내주기때문에 배열, 오브젝트로 변환을 해야되서
+                   * axios를 쓴다.
+                   */
+                }}
+              >
+                버튼
+              </button>
             </div>
           }
         />
@@ -96,7 +143,6 @@ const About = () => {
 
 const Card = (props) => {
   let Navigate = useNavigate();
-  console.log("e", props.data, props.index);
   return (
     <Col>
       <img
@@ -108,7 +154,6 @@ const Card = (props) => {
       />
       <h4>{props.data.title}</h4>
       <p>{props.data.price}</p>
-      <p>{props.data.content}</p>
     </Col>
   );
 };
