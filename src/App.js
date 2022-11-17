@@ -14,6 +14,7 @@ function App() {
   let [shoes, setShoes] = useState(data);
   let [page, setPage] = useState(2);
   let [load, setLoad] = useState(false);
+  let [loadInfo, setLoadInfo] = useState(true);
 
   //페이지 이동 도와주는 Navigate (이거도 훅임)
   //쓰는 방법은 그냥 href대신 Navigate쓰면 됩니다.
@@ -23,7 +24,13 @@ function App() {
     <div className="App">
       <Navbar bg="light" variant="light">
         <Container>
-          <Navbar.Brand href="#home">ShoeShop</Navbar.Brand>
+          <Navbar.Brand
+            onClick={() => {
+              Navigate("/");
+            }}
+          >
+            ShoeShop
+          </Navbar.Brand>
           <Nav className="me-auto">
             <Nav.Link
               onClick={() => {
@@ -62,46 +69,51 @@ function App() {
               {load ? (
                 <div className="alert alert-warning">로딩중 입니다.</div>
               ) : null}
-              <button
-                onClick={() => {
-                  setLoad(true);
-                  setPage(page + 1);
-                  axios
-                    .get(`https://codingapple1.github.io/shop/data${page}.json`)
-                    .then((e) => {
-                      let copy = [...shoes, ...e.data];
+              {loadInfo ? (
+                <button
+                  onClick={() => {
+                    setLoad(true);
+                    setPage(page + 1);
+                    axios
+                      .get(
+                        `https://codingapple1.github.io/shop/data${page}.json`
+                      )
+                      .then((e) => {
+                        let copy = [...shoes, ...e.data];
 
-                      // e.data.map((e) => {
-                      //   copy.push(e);
-                      // });
-                      setShoes(copy);
-                      setLoad(false);
-                      console.log(load);
-                    })
-                    .catch((e) => {
-                      console.log(e);
-                      console.log("실패 ㅜㅜ");
-                      if (e.response.status == 404) {
-                        alert("상품이 없습니다.");
-                      }
-                      setLoad(false);
-                      console.log(load);
-                    });
+                        // e.data.map((e) => {
+                        //   copy.push(e);
+                        // });
+                        setShoes(copy);
+                        setLoad(false);
+                        console.log(load);
+                      })
+                      .catch((e) => {
+                        console.log(e);
+                        console.log("실패 ㅜㅜ");
+                        if (e.response.status == 404) {
+                          alert("상품이 없습니다.");
+                          setLoadInfo(false);
+                        }
+                        setLoad(false);
+                        console.log(load);
+                      });
 
-                  /**
-                   * 동시에 ajax요청 여러개 할려면
-                   * Promise.all([ axios.get('/url1'), axios.get('/url2') ])
-                   * .then()
-                   * 이런식으로 하면 됨
-                   *
-                   * fetch?
-                   * fetch를 쓰면 json그대로 보내주기때문에 배열, 오브젝트로 변환을 해야되서
-                   * axios를 쓴다.
-                   */
-                }}
-              >
-                버튼
-              </button>
+                    /**
+                     * 동시에 ajax요청 여러개 할려면
+                     * Promise.all([ axios.get('/url1'), axios.get('/url2') ])
+                     * .then()
+                     * 이런식으로 하면 됨
+                     *
+                     * fetch?
+                     * fetch를 쓰면 json그대로 보내주기때문에 배열, 오브젝트로 변환을 해야되서
+                     * axios를 쓴다.
+                     */
+                  }}
+                >
+                  버튼
+                </button>
+              ) : null}
             </div>
           }
         />
